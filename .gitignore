@@ -1,0 +1,7 @@
+datos/*.xlsx
+datos/*.xls
+datos/*.csv
+.venv/
+.ipynb_checkpoints/
+__pycache__/
+.DS_Store
