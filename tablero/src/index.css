@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { @apply bg-lienzo text-tinta antialiased; }
+  body { @apply font-sans text-[15px] leading-snug; }
+  table { font-variant-numeric: tabular-nums; }
+  :focus-visible { @apply outline-none ring-2 ring-tinta ring-offset-2 ring-offset-casco; }
+}
+
+@layer utilities {
+  /* Rayado = dato que falta, se estimó o todavía no se captura. Es el único significado
+     que tiene en todo el tablero. */
+  .rayado {
+    background-image: repeating-linear-gradient(135deg, rgba(23, 23, 26, 0.13) 0 2px, transparent 2px 8px);
+  }
+  .rayado-claro {
+    background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0 2px, transparent 2px 8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

@@ -1,7 +1,15 @@
+# Datos del socio formador: no se versionan
 datos/*.xlsx
 datos/*.xls
 datos/*.csv
+salida/
+*.db
+tablero/public/datos.json
+
+# Entornos y cachés
 .venv/
 .ipynb_checkpoints/
 __pycache__/
+node_modules/
+tablero/dist/
 .DS_Store

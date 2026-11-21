@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/pandas-analítica-111318?style=for-the-badge&logo=pandas&logoColor=white" alt="pandas">
   <img src="https://img.shields.io/badge/SQL-SQLite-111318?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite">
   <img src="https://img.shields.io/badge/Jupyter-notebook-d22b2b?style=for-the-badge&logo=jupyter&logoColor=white" alt="Jupyter">
-  <img src="https://img.shields.io/badge/Etapa-1-d22b2b?style=for-the-badge" alt="Etapa 1">
+  <img src="https://img.shields.io/badge/Etapas-1_a_4-d22b2b?style=for-the-badge" alt="Etapas 1 a 4">
 </p>
 
 <p align="center">
@@ -16,6 +16,8 @@
   <a href="#cómo-están-conectados-los-datos"><b>Mapa</b></a> ·
   <a href="#el-modelo-que-proponemos"><b>Modelo</b></a> ·
   <a href="#qué-sigue-preguntas-e-indicadores"><b>Indicadores</b></a> ·
+  <a href="#etapa-3-acondicionamiento-de-los-datos"><b>Acondicionamiento</b></a> ·
+  <a href="#etapa-4-tablero-de-rh"><b>Tablero</b></a> ·
   <a href="#cómo-correrlo"><b>Cómo correrlo</b></a>
 </p>
 
@@ -160,17 +162,71 @@ Planteamos **25 preguntas detonadoras** y **15 indicadores** para que RH tome de
 
 <br>
 
+## Etapa 3: acondicionamiento de los datos
+
+El pipeline [`src/acondicionamiento_rh.py`](src/acondicionamiento_rh.py) toma los 7 archivos y entrega tablas unidas por ID en SQLite y CSV. No borra ni inventa registros: corrige formato, reconstruye llaves, convierte los centinelas en nulos y deja una bandera de calidad.
+
+| Método | Qué hace | Resultado con los datos reales |
+|---|---|---|
+| M1 · M2 | Normaliza texto y nulifica `PENDIENTE`, `Indefinido`, `1990-01-01` | 255 centinelas a nulo; el puesto pasa de 100 % aparente a 53 % real |
+| M3 | Catálogos con diccionario de equivalencias | Ciudad de 25 grafías a 22 lugares; marca de 12 a 5 |
+| M4 · M11 | Tipifica fechas y montos; no imputa | 25 sueldos y 70 costos de equipo en $0 pasan a nulo con bandera |
+| M5 | Reconstruye llaves | 91 equipos ligados por `id_colaborador`; 12 proyectos con `id_proyecto` |
+| M6 | Desambigua habilidades | 13 descripciones repetidas en EBS y Cloud |
+| M7 · M8 | Depura plantilla y fechas | 2 familiares fuera del denominador; 1 activo con fecha de baja marcado |
+| M9 · M10 | Solapamientos y cierre por baja | 1 persona sobreasignada, reportada a RH |
+| M12 | Matriz a formato largo | De 54 × 77 a 1,529 evaluaciones |
+| M13 | Trazabilidad | 831 correcciones en `log_correcciones` |
+| M14 | Tablas de extensión | `baja`, `registro_horas`, `tarifa_proyecto`, `certificacion` |
+
+Las 13 validaciones dan cero. Los indicadores viven en [`src/indicadores.sql`](src/indicadores.sql) como vistas, y cada uno reporta sobre cuántos registros confiables se calculó. El cuaderno [`etapa3_acondicionamiento.ipynb`](notebooks/etapa3_acondicionamiento.ipynb) recorre cada método con su antes y después.
+
+<p align="center">
+  <img src="img/tablero-calidad.png" alt="Calidad de datos: completitud aparente contra real, correcciones por método y validaciones" width="100%">
+</p>
+
+<br>
+
+## Etapa 4: tablero de RH
+
+Prototipo en React + Tailwind (carpeta [`tablero/`](tablero)) que lee las mismas vistas. Abre con las tres preguntas del negocio y tiene una pantalla por bloque: rotación, utilización, costos, habilidades, cumplimiento y activos, captura pendiente y calidad de datos.
+
+<p align="center">
+  <img src="img/tablero-resumen.png" alt="Tablero de RH: resumen" width="100%">
+</p>
+
+- **Lo rayado es dato que falta o se estimó.** El tablero nunca rellena un hueco para verse completo.
+- **Cada cifra dice su base**, por ejemplo «calculado sobre 68 de 73 activos con sueldo».
+- **Los 6 indicadores bloqueados ya están programados** contra las tablas de extensión y se activan cuando RH capture causa de baja, horas, tarifas, certificaciones y fecha de evaluación.
+- **Captura pendiente** lista el campo exacto y la tabla de cada dato que falta.
+
+<p align="center">
+  <img src="img/tablero-rotacion.png" alt="Tablero de RH: rotación" width="100%">
+</p>
+
+<br>
+
 ## Qué hay en el repo
 
 ```
 otconsultingdocumentacion/
+├── CLAUDE.md                                         contexto del reto, reglas y fórmulas
+├── src/
+│   ├── acondicionamiento_rh.py                       pipeline M1–M14
+│   ├── catalogos.py                                  diccionarios de equivalencias
+│   ├── extension.sql                                 tablas de extensión (M14)
+│   ├── indicadores.sql                               vistas de indicadores
+│   └── exportar_tablero.py                           de las vistas al JSON del tablero
+├── notebooks/
+│   ├── Exploracion_OTC_FrancoVarela.ipynb            exploración en Python + SQL
+│   └── etapa3_acondicionamiento.ipynb                acondicionamiento, método por método
+├── tablero/                                          tablero de RH en React + Tailwind
 ├── docs/
-│   ├── OT_Consulting_Etapa1_Documento_Completo.pdf   documento entregable completo
+│   ├── OT_Consulting_Etapa1_Documento_Completo.pdf   documento entregable de la Etapa 1
+│   ├── etapa-3-acondicionamiento.md                  resultados reales del pipeline
 │   ├── exploracion-datos.md                          hallazgos de la exploración
 │   └── avance-reto-etapa-1.md                        contexto de la empresa y del área
-├── notebooks/
-│   └── Exploracion_OTC_FrancoVarela.ipynb            exploración en Python + SQL
-├── img/                                              banner, hallazgos, mapa y modelo
+├── img/                                              banner, hallazgos, mapa, modelo y tablero
 ├── datos/README.md                                   los Excel originales no se publican
 └── requirements.txt
 ```
@@ -186,17 +242,21 @@ Los Excel del socio formador no vienen en el repo. Si los tienes, ponlos en `dat
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-jupyter notebook notebooks/Exploracion_OTC_FrancoVarela.ipynb
+
+python src/acondicionamiento_rh.py --corte 2026-11-20   # genera salida/otc_rh.db y los CSV
+python src/exportar_tablero.py                          # agrega --con-nombres para uso interno de RH
+
+cd tablero && npm install && npm run dev                # abre el tablero
 ```
 
-El notebook carga los 7 archivos y hace un perfil de cada columna (tipo, nulos, únicos, ejemplos y rangos). Valida con SQL la integridad entre tablas, calcula los primeros indicadores y cierra cada sección con sus respuestas en markdown.
+El pipeline imprime las correcciones por método y las validaciones; si alguna no da cero, termina con error. Los cuadernos se abren con `jupyter notebook notebooks/`.
 
 <br>
 
 ## Privacidad
 
 > [!IMPORTANT]
-> Este repo **no publica datos individuales**. Los Excel fuente se quedan fuera (`.gitignore`). En el notebook se ocultan los valores de las columnas con datos personales, sueldos y contactos de clientes. Solo se muestran conteos, totales y gráficas agregadas. Los RFC, CURP y NSS ya venían anonimizados por el socio formador.
+> Este repo **no publica datos individuales**. Los Excel fuente se quedan fuera (`.gitignore`). En el notebook se ocultan los valores de las columnas con datos personales, sueldos y contactos de clientes. Solo se muestran conteos, totales y gráficas agregadas. La carpeta `salida/` y el JSON del tablero tampoco se versionan, y el tablero se exporta por defecto solo con IDs, sin nombres. Los RFC, CURP y NSS ya venían anonimizados por el socio formador.
 
 <br>
 
