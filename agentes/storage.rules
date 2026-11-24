@@ -1,0 +1,12 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Cada usuario sube CVs (PDF, máx. 10 MB) a su carpeta; solo él los lee. Las funciones usan Admin SDK.
+    match /cvs/{uid}/{archivo} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null && request.auth.uid == uid
+                    && request.resource.size < 10 * 1024 * 1024
+                    && request.resource.contentType == 'application/pdf';
+    }
+  }
+}

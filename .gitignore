@@ -13,3 +13,8 @@ __pycache__/
 node_modules/
 tablero/dist/
 .DS_Store
+
+# Sistema agéntico
+agentes/web/dist/
+agentes/.firebase/
+*.local

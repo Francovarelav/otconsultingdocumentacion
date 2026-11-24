@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { @apply bg-lienzo text-tinta antialiased; }
+  body { @apply font-sans text-[14.5px] leading-snug; font-feature-settings: 'cv11', 'ss01'; }
+  table { font-variant-numeric: tabular-nums; }
+  :focus-visible { @apply outline-none ring-2 ring-tinta ring-offset-2 ring-offset-white; }
+  h1, h2, h3 { letter-spacing: -0.025em; }
+}
+
+@layer utilities {
+  /* Rayado = dato que falta, se estimó o todavía no se captura.
+     Es el ÚNICO significado que tiene en toda la interfaz. */
+  .rayado {
+    background-image: repeating-linear-gradient(135deg, rgba(26, 26, 26, 0.12) 0 2px, transparent 2px 7px);
+  }
+  .rayado-rojo {
+    background-image: repeating-linear-gradient(135deg, rgba(253, 17, 28, 0.22) 0 2px, transparent 2px 7px);
+  }
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  /* Degradados de marca: rojo OT → coral → naranja cálido. Sin glow. */
+  .grad-ot { background-image: linear-gradient(135deg, #FD111C 0%, #FF5A36 55%, #FF8A4C 100%); }
+  .grad-ot-h { background-image: linear-gradient(90deg, #FD111C 0%, #FF5A36 55%, #FF8A4C 100%); }
+  .grad-ot-v { background-image: linear-gradient(180deg, #FD111C 0%, #FF5A36 55%, #FF8A4C 100%); }
+  .grad-ot-hover:hover { background-image: linear-gradient(135deg, #E50A15 0%, #F24A28 55%, #F57A3C 100%); }
+  .texto-grad {
+    background-image: linear-gradient(90deg, #FD111C 0%, #FF5A36 60%, #FF8A4C 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  /* Matiz por agente, todos dentro de la familia cálida (el Auditor en grafito). */
+  .grad-asistente { background-image: linear-gradient(135deg, #FD111C 0%, #FF5A36 100%); }
+  .grad-rotacion { background-image: linear-gradient(135deg, #E8102A 0%, #FF4D6A 100%); }
+  .grad-staffing { background-image: linear-gradient(135deg, #FF5A36 0%, #FF9A4C 100%); }
+  .grad-reclutador { background-image: linear-gradient(135deg, #FF3B2F 0%, #FFB057 100%); }
+  .grad-nomina { background-image: linear-gradient(135deg, #F03A2E 0%, #FF7A3D 100%); }
+  .grad-cultura { background-image: linear-gradient(135deg, #FF4B3E 0%, #FF6F91 100%); }
+  .grad-auditor { background-image: linear-gradient(135deg, #1A1A1A 0%, #4A4A4F 100%); }
+  /* Mesh muy suave: radiales rojo/naranja al 6–10 % sobre blanco. */
+  .mesh {
+    background-color: #fff;
+    background-image:
+      radial-gradient(60% 80% at 100% 0%, rgba(255, 138, 76, 0.10) 0%, transparent 70%),
+      radial-gradient(50% 70% at 0% 100%, rgba(253, 17, 28, 0.06) 0%, transparent 70%);
+  }
+  .mesh-gris {
+    background-color: #F5F5F5;
+    background-image:
+      radial-gradient(70% 90% at 100% 0%, rgba(255, 138, 76, 0.10) 0%, transparent 65%),
+      radial-gradient(60% 80% at 0% 100%, rgba(253, 17, 28, 0.06) 0%, transparent 70%);
+  }
+  .shimmer {
+    background-image: linear-gradient(90deg, rgba(253,17,28,.15) 0%, #FD111C 30%, #FF8A4C 50%, rgba(255,138,76,.15) 70%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+  .scroll-fino { scrollbar-width: thin; scrollbar-color: #DEDEDE transparent; }
+}
+
+/* Respuestas del agente en markdown */
+.md { @apply text-[14.5px] leading-relaxed text-tinta; }
+.md > * + * { @apply mt-3; }
+.md strong { @apply font-semibold; }
+.md h1, .md h2, .md h3, .md h4 { @apply font-semibold tracking-apretado; }
+.md h1 { @apply text-lg; } .md h2 { @apply text-base; } .md h3, .md h4 { @apply text-[15px]; }
+.md ul { @apply list-disc space-y-1 pl-5; }
+.md ol { @apply list-decimal space-y-1 pl-5; }
+.md li > ul, .md li > ol { @apply mt-1; }
+.md code { @apply rounded bg-panel px-1 py-0.5 text-[13px]; }
+.md pre { @apply overflow-x-auto rounded-xl bg-panel p-3 text-[13px]; }
+.md pre code { @apply bg-transparent p-0; }
+.md a { @apply text-rojo underline underline-offset-2; }
+.md blockquote { @apply border-l-2 border-rojo pl-3 text-humo; }
+.md hr { @apply border-linea; }
+.md .tabla-md { @apply overflow-x-auto rounded-xl border border-linea; }
+.md table { @apply w-full border-collapse text-left text-[13.5px]; }
+.md th { @apply border-b border-linea bg-panel px-3 py-2 font-medium text-humo; }
+.md td { @apply border-b border-linea px-3 py-2 align-top; }
+.md tr:last-child td { @apply border-b-0; }
+
+/* ------------------------------------------------ animaciones sutiles */
+@keyframes entrar { from { opacity: 0; transform: translateY(10px); filter: blur(4px) } to { opacity: 1; transform: none; filter: none } }
+@keyframes entrar-lado { from { opacity: 0; transform: translateX(-6px) } to { opacity: 1; transform: none } }
+@keyframes pagina { from { opacity: 0 } to { opacity: 1 } }
+@keyframes escala { from { opacity: 0; transform: scale(.98) } to { opacity: 1; transform: none } }
+@keyframes panel-entra { from { opacity: 0; transform: translateX(16px) scale(.98) } to { opacity: 1; transform: none } }
+@keyframes crecer-x { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+@keyframes crecer-y { from { transform: scaleY(0) } to { transform: scaleY(1) } }
+@keyframes trazo { from { stroke-dashoffset: var(--largo, 60) } to { stroke-dashoffset: 0 } }
+@keyframes onda { 0% { transform: scale(1); opacity: .45 } 100% { transform: scale(1.35); opacity: 0 } }
+@keyframes toast { from { opacity: 0; transform: translateY(12px) scale(.98) } to { opacity: 1; transform: none } }
+@keyframes pulso { 0% { box-shadow: 0 0 0 0 rgba(253,17,28,.35) } 70% { box-shadow: 0 0 0 7px rgba(253,17,28,0) } 100% { box-shadow: 0 0 0 0 rgba(253,17,28,0) } }
+@keyframes esqueleto { from { background-position: 200% 0 } to { background-position: -200% 0 } }
+@keyframes paleta { from { opacity: 0; transform: translateY(-8px) scale(.985) } to { opacity: 1; transform: none } }
+.anim-entrar { animation: entrar 320ms cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(min(var(--i, 0), 14) * 40ms); }
+/* Coreografía por página: encabezado → tarjetas → contenido (hijos directos de la raíz de la página). */
+.coreo > * > * { animation: entrar 360ms cubic-bezier(.2,.8,.2,1) both; }
+.coreo > * > *:nth-child(2) { animation-delay: 60ms; }
+.coreo > * > *:nth-child(3) { animation-delay: 120ms; }
+.coreo > * > *:nth-child(4) { animation-delay: 180ms; }
+.coreo > * > *:nth-child(5) { animation-delay: 230ms; }
+.coreo > * > *:nth-child(n+6) { animation-delay: 270ms; }
+.anim-escala { animation: escala 220ms cubic-bezier(.2,.8,.2,1) both; }
+.anim-panel { animation: panel-entra 260ms cubic-bezier(.2,.8,.2,1) both; }
+.crecer-x { transform-origin: left center; animation: crecer-x 700ms cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(min(var(--i, 0), 14) * 40ms + 120ms); }
+.crecer-y { transform-origin: bottom center; animation: crecer-y 650ms cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(min(var(--i, 0), 20) * 30ms + 120ms); }
+.trazo { stroke-dasharray: var(--largo, 60); animation: trazo 420ms cubic-bezier(.2,.8,.2,1) both; }
+.onda { animation: onda 900ms cubic-bezier(.2,.8,.2,1) both; }
+.anim-lado { animation: entrar-lado 240ms cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(min(var(--i, 0), 14) * 40ms); }
+.anim-pagina { animation: pagina 200ms ease-out both; }
+.anim-toast { animation: toast 240ms cubic-bezier(.2,.7,.2,1) both; }
+.anim-paleta { animation: paleta 180ms cubic-bezier(.2,.7,.2,1) both; }
+.pulso { animation: pulso 2.2s ease-out infinite; }
+.esqueleto {
+  background-image: linear-gradient(90deg, #F1F1F1 0%, #F1F1F1 35%, #FAFAFA 50%, #F1F1F1 65%, #F1F1F1 100%);
+  background-size: 200% 100%;
+  animation: esqueleto 1.3s linear infinite;
+}
+mark.resalte { background: #FFE3D6; color: inherit; border-radius: 3px; padding: 0 1px; }
+
+@keyframes shimmer { from { background-position: 100% 0 } to { background-position: -100% 0 } }
+@keyframes puntos { 0%, 80%, 100% { opacity: .25 } 40% { opacity: 1 } }
+.punto { animation: puntos 1.2s infinite ease-in-out; }
+.punto:nth-child(2) { animation-delay: .15s; }
+.punto:nth-child(3) { animation-delay: .3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
