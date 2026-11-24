@@ -1,0 +1,64 @@
+rules_version = '2';
+// El navegador SOLO LEE. Toda escritura pasa por Cloud Functions (Admin SDK), que validan rol y reglas.
+// Roles: admin (todo) · rh (opera) · lector (consulta) · colaborador (autoservicio: solo lo suyo).
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function u() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+    function autorizado() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
+        && u().get('activo', true) != false;
+    }
+    function rol() { return u().rol; }
+    function staff() { return autorizado() && rol() in ['admin', 'rh', 'lector']; }
+    function admin() { return autorizado() && rol() == 'admin'; }
+    function suyo(id) { return autorizado() && rol() == 'colaborador' && u().id_colaborador == id; }
+
+    match /usuarios/{uid} {
+      allow read: if request.auth != null && (request.auth.uid == uid || admin());
+    }
+
+    // Sueldos y costos individuales: solo admin
+    match /colaboradores_privado/{id} { allow read: if admin(); }
+
+    // Ficha: staff ve todo; el colaborador, la suya
+    match /colaboradores/{id} { allow read: if staff() || suyo(id); }
+    match /matriz/{id} { allow read: if staff() || suyo(resource.data.id_colaborador); }
+    match /asignaciones/{id} { allow read: if staff() || suyo(resource.data.id_colaborador); }
+    match /activos/{id} { allow read: if staff() || suyo(resource.data.id_colaborador); }
+
+    // Operación
+    match /asistencia/{id} { allow read: if staff() || suyo(resource.data.id_colaborador); }
+    match /vacaciones/{id} { allow read: if staff() || suyo(resource.data.id_colaborador); }
+    match /nomina_periodos/{periodo} {
+      allow read: if staff();
+      match /recibos/{id} { allow read: if admin() || suyo(id); }
+    }
+
+    // Conversaciones: cada quien las suyas
+    match /conversaciones/{id} { allow read: if autorizado() && resource.data.uid == request.auth.uid; }
+
+    // Encuestas: cualquiera con sesión ve las encuestas; respuestas crudas nunca (anonimato)
+    match /encuestas/{id} {
+      allow read: if staff() || (autorizado() && resource.data.estado == 'abierta');
+      match /respuestas/{r} { allow read: if false; }
+    }
+    match /encuestas_resultados/{id} { allow read: if autorizado() && rol() in ['admin', 'rh']; }
+
+    // Cultura y catálogos de consulta general
+    match /reconocimientos/{id} { allow read: if autorizado(); }
+    match /comunicados/{id} { allow read: if autorizado(); }
+    match /habilidades/{id} { allow read: if autorizado(); }
+    match /config/{doc} {
+      allow read: if autorizado() && (doc in ['cultura', 'jornada'] || staff());
+    }
+
+    // Resto de colecciones analíticas y de trabajo: solo staff
+    match /{coleccion}/{id} {
+      allow read: if staff() && !(coleccion in ['colaboradores_privado', 'conversaciones', 'usuarios']);
+    }
+    match /{document=**} { allow write: if false; }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "otc-rh": {
+      "command": "node",
+      "args": ["agentes/functions/mcp-servidor.js"],
+      "env": { "OTC_PROYECTO": "otc-rh-agentes" }
+    }
+  }
+}
