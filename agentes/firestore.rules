@@ -3,21 +3,24 @@ rules_version = '2';
 // Roles: admin (todo) · rh (opera) · lector (consulta) · colaborador (autoservicio: solo lo suyo).
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Demo: el uid demo_rh_user tiene acceso admin sin doc en usuarios/
+    function esDemo() { return request.auth != null && request.auth.uid == 'demo_rh_user'; }
     function u() {
       return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
     }
     function autorizado() {
-      return request.auth != null
-        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
-        && u().get('activo', true) != false;
+      return esDemo()
+        || (request.auth != null
+            && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
+            && u().get('activo', true) != false);
     }
-    function rol() { return u().rol; }
+    function rol() { return esDemo() ? 'admin' : u().rol; }
     function staff() { return autorizado() && rol() in ['admin', 'rh', 'lector']; }
     function admin() { return autorizado() && rol() == 'admin'; }
     function suyo(id) { return autorizado() && rol() == 'colaborador' && u().id_colaborador == id; }
 
     match /usuarios/{uid} {
-      allow read: if request.auth != null && (request.auth.uid == uid || admin());
+      allow read: if request.auth != null && (request.auth.uid == uid || admin() || esDemo());
     }
 
     // Sueldos y costos individuales: solo admin

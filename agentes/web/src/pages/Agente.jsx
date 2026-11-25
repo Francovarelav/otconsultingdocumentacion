@@ -10,6 +10,7 @@ import { useSesion } from '../lib/auth.jsx'
 import { useDocVivo, useEnVivo } from '../lib/datos.js'
 import { hace, ms, normal } from '../lib/formato.js'
 import { agente as buscarAgente } from '../lib/agentes.js'
+import Monito from '../components/Monito.jsx'
 import { AvatarAgente, Boton, CampoBusqueda, Cargando, ErrorCaja, Markdown, Resaltar, useDebounce } from '../components/ui.jsx'
 
 export default function Agente() {
@@ -144,7 +145,7 @@ function Chat({ ag }) {
       {/* Chat */}
       <section className="order-1 flex min-h-[calc(100vh-10rem)] flex-col xl:order-2">
         <header className="flex items-center gap-3 border-b border-linea pb-4">
-          <AvatarAgente ag={ag} tam="h-11 w-11" icono="h-5 w-5" />
+          <AvatarAgente ag={ag} tam="h-11 w-11" estado={enviando ? 'pensando' : 'quieto'} animado />
           <div className="min-w-0">
             <h1 className="text-[20px] font-semibold tracking-apretado">{ag.nombre}</h1>
             <p className="truncate text-[13px] text-humo">{ag.descripcion}</p>
@@ -156,7 +157,7 @@ function Chat({ ag }) {
             <div className="mx-auto max-w-[780px]"><Cargando lineas={4} /></div>
           ) : vacia ? (
             <div className="mesh mx-auto max-w-[720px] rounded-4xl border border-linea px-6 py-10 sm:px-10">
-              <AvatarAgente ag={ag} tam="h-12 w-12" icono="h-5 w-5" redondeo="rounded-2xl" />
+              <Monito agente={ag.id} estado="quieto" tam={88} titulo={ag.nombre} />
               <p className="mt-5 text-[28px] font-semibold leading-tight tracking-titulo">
                 ¿En qué te <span className="texto-grad">ayudo</span>?
               </p>
@@ -178,7 +179,7 @@ function Chat({ ag }) {
             </div>
           ) : (
             <ol className="mx-auto max-w-[780px] space-y-5">
-              {mensajes.map((m, i) => <Mensaje key={i} m={m} ag={ag} />)}
+              {mensajes.map((m, i) => <Mensaje key={i} m={m} ag={ag} ultimo={i === mensajes.length - 1 && !enviando} />)}
               {enviando && <Pensando ag={ag} />}
             </ol>
           )}
@@ -226,7 +227,13 @@ function haceCorto(v) {
   return t.replace('hace un momento', 'ahora').replace('hace ', '')
 }
 
-function Mensaje({ m, ag }) {
+function Mensaje({ m, ag, ultimo }) {
+  // La última respuesta "habla" un momento y luego queda contenta.
+  const [habla, setHabla] = useState(true)
+  useEffect(() => {
+    const t = setTimeout(() => setHabla(false), 2400)
+    return () => clearTimeout(t)
+  }, [])
   if (m.rol === 'usuario') {
     return (
       <li className="anim-entrar flex justify-end">
@@ -238,7 +245,7 @@ function Mensaje({ m, ag }) {
   }
   return (
     <li className="anim-entrar flex gap-3">
-      <AvatarAgente ag={ag} tam="h-8 w-8" icono="h-4 w-4" redondeo="rounded-lg" />
+      <AvatarAgente ag={ag} tam="h-8 w-8" redondeo="rounded-lg" estado={ultimo ? (habla ? 'hablando' : 'feliz') : 'quieto'} animado={ultimo} />
       <div className="min-w-0 flex-1 rounded-[22px] rounded-tl-md border border-linea bg-white px-5 py-4 shadow-[0_1px_2px_rgba(26,26,26,.04)]">
         {m.pasos?.length > 0 && <Pasos pasos={m.pasos} />}
         <Markdown>{m.texto}</Markdown>
@@ -332,7 +339,7 @@ function Pensando({ ag }) {
   const fase = FASES[Math.min(Math.floor(seg / 6), FASES.length - 1)]
   return (
     <li className="anim-entrar flex gap-3" aria-live="polite">
-      <AvatarAgente ag={ag} tam="h-8 w-8" icono="h-4 w-4" redondeo="rounded-lg" />
+      <AvatarAgente ag={ag} tam="h-8 w-8" redondeo="rounded-lg" estado="pensando" animado />
       <div className="w-full max-w-[360px] rounded-[22px] rounded-tl-md border border-linea bg-white px-5 py-4">
         <div className="flex items-center justify-between gap-3">
           <span className="flex items-center gap-2 text-[13.5px] font-medium">

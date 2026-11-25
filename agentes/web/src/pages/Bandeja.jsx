@@ -8,6 +8,7 @@ import { hace, humano, ms, normal, num } from '../lib/formato.js'
 import { useBloqueo } from '../lib/auth.jsx'
 import { agenteParaTarea, nombreAgente } from '../lib/agentes.js'
 import { Boton, CampoBusqueda, Cargando, Encabezado, ErrorCaja, Pastilla, Resaltar, Selector, Vacio, useAviso, useDebounce } from '../components/ui.jsx'
+import { ResumenBandeja } from '../components/GraficasPersonas.jsx'
 
 // Nombres legibles para los tipos que crea la rutina (si llega otro, se muestra humanizado).
 const TIPOS = {
@@ -73,6 +74,8 @@ export default function Bandeja() {
       <Encabezado titulo="Bandeja" subtitulo="Lo que la rutina diaria y los agentes encontraron al revisar las 20 reglas. Cada tarea dice qué regla incumple.">
         <Pastilla tono="tinta" className="!text-[13px]">{num(abiertas)} abiertas</Pastilla>
       </Encabezado>
+
+      {!cargando && !error && <ResumenBandeja datos={datos} nombreTipo={nombreTipo} />}
 
       <div className="mb-6 flex flex-wrap items-center gap-2">
         <CampoBusqueda valor={texto} onCambio={setTexto} placeholder="Buscar tarea, persona o ID" className="w-full sm:w-[260px]" />

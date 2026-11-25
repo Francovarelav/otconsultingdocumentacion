@@ -8,6 +8,7 @@ import MedidorGasto from '../components/Gasto.jsx'
 import { fila, filas, useEnVivo, useIndicadores } from '../lib/datos.js'
 import { hace, humano, ms, num, pct } from '../lib/formato.js'
 import { agente, nombreAgente } from '../lib/agentes.js'
+import Monito from '../components/Monito.jsx'
 import { AvatarAgente, Base, Boton, Contador, Cargando, Markdown, Pastilla, Pestanas, Vacio, useAviso } from '../components/ui.jsx'
 
 function saludo() {
@@ -22,11 +23,14 @@ export default function Inicio() {
   const navegar = useNavigate()
   return (
     <div>
-      <header className="mesh rounded-4xl border border-linea px-6 py-8 sm:px-9 sm:py-10">
+      <header className="mesh relative flex items-center gap-5 rounded-4xl border border-linea px-6 py-8 sm:px-9 sm:py-10">
+        <Monito agente="asistente" estado="feliz" tam={64} titulo="Asistente RH" className="hidden sm:block" />
+        <div className="min-w-0">
         <h1 className="text-[32px] font-semibold leading-tight tracking-titulo sm:text-[40px]">
           {saludo()}{nombre ? <>, <span className="texto-grad">{nombre}</span></> : ''}.
         </h1>
         <p className="mt-1.5 text-[15.5px] text-humo">Esto es lo que los agentes revisaron por ti. Empieza por lo que más pesa.</p>
+        </div>
       </header>
 
       <div className="mt-3 grid gap-3 md:grid-cols-3">

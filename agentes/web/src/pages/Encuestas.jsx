@@ -14,6 +14,7 @@ import {
   Boton, CampoBusqueda, Campo, Cargando, Contador, Encabezado, ErrorCaja, Falta, Panel, Pastilla, Resaltar,
   Selector, Vacio, claseEntrada, useAviso, useDebounce,
 } from '../components/ui.jsx'
+import { ResumenEncuestas } from '../components/GraficasPersonas.jsx'
 
 // ============================================================ catálogos de la UI
 const TIPOS_ENCUESTA = {
@@ -229,6 +230,8 @@ function Gestion() {
       <Encabezado titulo="Encuestas" subtitulo="eNPS, clima, pulso y salida. Comparte el enlace o el QR; los resultados se recalculan con cada respuesta.">
         <Boton variante="primario" icono={Plus} onClick={() => setElegir(true)}>Nueva encuesta</Boton>
       </Encabezado>
+
+      {!cargando && !error && <ResumenEncuestas encuestas={datos} />}
 
       <div className="mb-5 flex flex-wrap items-center gap-2">
         <CampoBusqueda valor={texto} onCambio={setTexto} placeholder="Buscar encuesta" className="w-full sm:w-[280px]" />

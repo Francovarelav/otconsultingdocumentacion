@@ -8,6 +8,7 @@ import { useColeccion, useDocVivo, useEnVivo } from '../lib/datos.js'
 import { hoyISO, normal, num, pct } from '../lib/formato.js'
 import { DIAS_CORTOS, JORNADA_BASE, deISO, esLaboral, iso, lunesDe, minutosAHoras, sumarDias } from '../lib/fechas.js'
 import Checador from '../components/Checador.jsx'
+import { AnalisisAsistencia } from '../components/GraficasOperacion.jsx'
 import {
   Base, Boton, CampoBusqueda, Campo, Cargando, Cifra, Contador, Encabezado, ErrorCaja, Panel, Pastilla, Pestanas, Resaltar, Selector, Tabla, Vacio,
   claseEntrada, useAviso, useDebounce,
@@ -17,14 +18,14 @@ export default function Asistencia() {
   const { esAdmin, esColaborador, idColaborador } = useSesion()
   const jornadaDoc = useDocVivo(['config', 'jornada'])
   const jornada = { ...JORNADA_BASE, ...(jornadaDoc.datos || {}) }
-  const [vista, setVista] = useState('dia')
+  const [vista, setVista] = useState(() => (esColaborador ? 'dia' : 'analisis'))
   const [editar, setEditar] = useState(false)
 
   return (
     <div>
       <Encabezado
         titulo={esColaborador ? 'Checar' : 'Asistencia'}
-        subtitulo={esColaborador ? 'Registra tu entrada y tu salida. Tu historial queda en tu ficha.' : 'Entradas, salidas y retardos contra la jornada configurada. La asistencia se llena con el uso: no hay historial previo.'}
+        subtitulo={esColaborador ? 'Registra tu entrada y tu salida. Tu historial queda en tu ficha.' : 'Entradas, salidas y retardos contra la jornada configurada. Las faltas cuentan solo desde que inició el registro.'}
       >
         {esAdmin && <Boton icono={Settings2} onClick={() => setEditar(true)}>Jornada</Boton>}
       </Encabezado>
@@ -36,10 +37,12 @@ export default function Asistencia() {
           tam="ch"
           valor={vista}
           onCambio={setVista}
-          opciones={[{ valor: 'dia', etiqueta: esColaborador ? 'Mis registros' : 'Por día' }, { valor: 'semana', etiqueta: 'Semana' }]}
+          opciones={[...(esColaborador ? [] : [{ valor: 'analisis', etiqueta: 'Análisis' }]), { valor: 'dia', etiqueta: esColaborador ? 'Mis registros' : 'Por día' }, { valor: 'semana', etiqueta: 'Semana' }]}
           className="mb-5"
         />
-        {vista === 'dia' ? (
+        {vista === 'analisis' && !esColaborador ? (
+          <AnalisisAsistencia jornada={jornada} />
+        ) : vista === 'dia' ? (
           esColaborador ? <MisRegistros id={idColaborador} /> : <PorDia jornada={jornada} />
         ) : (
           <Semana jornada={jornada} soloId={esColaborador ? idColaborador : null} />

@@ -61,6 +61,22 @@ async function usuario(req, permitidos = STAFF) {
   return { uid: req.auth.uid, rol, autor: u.nombre || u.email || req.auth.token.email, id_colaborador: u.id_colaborador ?? null };
 }
 
+// La cuenta demo tiene credenciales públicas: su uso de IA lleva un cupo diario propio, aparte del
+// tope mensual y de la pausa de config/gasto. Protege el billing aunque alguien abuse del demo.
+const DEMO_UID = "demo_rh_user";
+const CUPO_DEMO_DIA = 25;
+async function cupoIA(uid) {
+  if (uid !== DEMO_UID) return;
+  const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Monterrey" }).format(new Date());
+  const ref = db.collection("config").doc("gasto_demo");
+  await db.runTransaction(async (tx) => {
+    const g = (await tx.get(ref)).data() ?? {};
+    const n = g.fecha === hoy ? g.llamadas ?? 0 : 0;
+    if (n >= CUPO_DEMO_DIA) throw new HttpsError("resource-exhausted", `La cuenta demo llegó a su límite de ${CUPO_DEMO_DIA} consultas de IA por día. Vuelve mañana.`);
+    tx.set(ref, { fecha: hoy, llamadas: n + 1, limite: CUPO_DEMO_DIA });
+  });
+}
+
 const texto = (v, max = 4000) => {
   if (typeof v !== "string" || !v.trim()) throw new HttpsError("invalid-argument", "Falta texto.");
   return v.trim().slice(0, max);
@@ -76,6 +92,7 @@ function errorIA(e, contexto) {
 // ---------------------------------------------------------------- chat con un agente
 export const chatAgente = onCall(IA, async (req) => {
   const u = await usuario(req, STAFF);
+  await cupoIA(u.uid);
   const { agente, conversacionId } = req.data ?? {};
   const mensaje = texto(req.data?.mensaje);
   if (!AGENTES[agente]) throw new HttpsError("invalid-argument", "Agente desconocido.");
@@ -114,6 +131,7 @@ export const chatAgente = onCall(IA, async (req) => {
 // ---------------------------------------------------------------- lector de CVs
 export const leerCv = onCall(IA, async (req) => {
   const u = await usuario(req, ["admin", "rh"]);
+  await cupoIA(u.uid);
   const ruta = texto(req.data?.ruta, 500);
   if (!ruta.startsWith(`cvs/${u.uid}/`) || !ruta.toLowerCase().endsWith(".pdf"))
     throw new HttpsError("invalid-argument", "Ruta de CV inválida.");
@@ -190,6 +208,7 @@ export const rutinaDiaria = onSchedule(
 
 export const ejecutarRutina = onCall(IA, async (req) => {
   const u = await usuario(req, ["admin", "rh"]);
+  await cupoIA(u.uid);
   try {
     return await correrRutina({ db, cliente: ia(), origen: `manual · ${u.autor}` });
   } catch (e) {
@@ -408,7 +427,8 @@ export const cambiarEstadoEncuesta = onCall(BASE, async (req) => {
 });
 
 export const analizarEncuesta = onCall(IA, async (req) => {
-  await usuario(req, OPERA);
+  const u = await usuario(req, OPERA);
+  await cupoIA(u.uid);
   try { return await analizarConIA(db, ia(), String(req.data?.id ?? "")); } catch (e) { throw e?.codigo ? errorIA(e) : negocio(e); }
 });
 
@@ -452,3 +472,4 @@ export const guardarCultura = onCall(BASE, async (req) => {
   await db.collection("config").doc("cultura").set({ mision: String(d.mision ?? "").slice(0, 1000), vision: String(d.vision ?? "").slice(0, 1000), valores, actualizado: FieldValue.serverTimestamp(), actualizado_por: u.autor }, { merge: true });
   return { ok: true };
 });
+

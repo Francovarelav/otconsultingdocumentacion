@@ -7,6 +7,7 @@ import { useSesion } from '../lib/auth.jsx'
 import { useEnVivo } from '../lib/datos.js'
 import { hace, humano, normal, num } from '../lib/formato.js'
 import { periodosQuincenales } from '../lib/fechas.js'
+import { AnalisisNomina } from '../components/GraficasOperacion.jsx'
 import {
   Aviso, Base, Boton, CampoBusqueda, Cargando, Contador, Encabezado, ErrorCaja, Falta, Pastilla, Selector, Tarjeta, Vacio,
   Resaltar, useAviso, useDebounce,
@@ -141,6 +142,7 @@ function Prenomina() {
               <p className="mt-2 text-[12px] text-humo">Con prima vacacional del 25 % (LFT art. 80).</p>
             </Tarjeta>
           </div>
+          {!recibos.cargando && !recibos.error && <AnalisisNomina recibos={recibos.datos} />}
           <Recibos recibos={recibos} />
         </>
       )}

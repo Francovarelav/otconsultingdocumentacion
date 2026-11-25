@@ -3,7 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { ArrowRight, Eye, EyeOff, LockKeyhole } from 'lucide-react'
 import { auth } from '../firebase.js'
-import { useSesion } from '../lib/auth.jsx'
+import { useSesion, DEMO_CORREO, DEMO_CLAVE } from '../lib/auth.jsx'
 import { Boton, Campo, ErrorCaja, Isotipo, claseEntrada } from '../components/ui.jsx'
 
 const ERRORES = {
@@ -22,8 +22,8 @@ const ERRORES = {
 export default function Login() {
   const { estado, usuario, salir } = useSesion()
   const { state } = useLocation()
-  const [correo, setCorreo] = useState('')
-  const [clave, setClave] = useState('')
+  const [correo, setCorreo] = useState(DEMO_CORREO)
+  const [clave, setClave] = useState(DEMO_CLAVE)
   const [verClave, setVerClave] = useState(false)
   const [error, setError] = useState('')
   const [enviando, setEnviando] = useState(false)

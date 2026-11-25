@@ -9,6 +9,7 @@ import { NIVELES, dinero, fecha, hace, normal, num, pct } from '../lib/formato.j
 import {
   Avance, Boton, CampoBusqueda, Cargando, Encabezado, ErrorCaja, Falta, Nivel, Pastilla, Resaltar, useDebounce, Panel, Selector, Tabla, Vacio, Valor,
 } from '../components/ui.jsx'
+import { ResumenPlantilla } from '../components/GraficasPersonas.jsx'
 
 export const BANDERAS = [
   { campo: 'falta_puesto', etiqueta: 'Sin puesto' },
@@ -61,6 +62,8 @@ export default function Colaboradores() {
       <Encabezado titulo="Colaboradores" subtitulo="La plantilla tal como quedó tras el acondicionamiento. El rayado marca el dato que falta.">
         <Pastilla tono="neutro" className="!text-[13px]">{num(lista.length)} de {num(datos.length)}</Pastilla>
       </Encabezado>
+
+      {!cargando && !error && <ResumenPlantilla datos={datos} />}
 
       <div className="mb-5 flex flex-wrap items-center gap-2">
         <CampoBusqueda valor={texto} onCambio={setTexto} placeholder="Nombre, ID o puesto" className="w-full sm:w-[260px]" />

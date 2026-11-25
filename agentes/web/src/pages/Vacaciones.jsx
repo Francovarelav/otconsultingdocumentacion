@@ -8,6 +8,7 @@ import { useDocVivo, useEnVivo } from '../lib/datos.js'
 import { hace, hoyISO, humano, ms, normal, num } from '../lib/formato.js'
 import { DIAS_CORTOS, JORNADA_BASE, MESES, diaSemana, diasHabiles, esLaboral, festivos, iso, sumarDias } from '../lib/fechas.js'
 import Saldo from '../components/Saldo.jsx'
+import { AnalisisVacaciones } from '../components/GraficasOperacion.jsx'
 import SelectorColaborador from '../components/SelectorColaborador.jsx'
 import {
   Boton, CampoBusqueda, Campo, Cargando, Encabezado, ErrorCaja, Iniciales, Panel, Pastilla, Pestanas, Resaltar, Selector, Vacio,
@@ -29,7 +30,7 @@ export default function Vacaciones() {
     () => (esColaborador ? (idColaborador ? query(collection(db, 'vacaciones'), where('id_colaborador', '==', idColaborador)) : null) : collection(db, 'vacaciones')),
     [esColaborador, idColaborador],
   )
-  const [vista, setVista] = useState('solicitudes')
+  const [vista, setVista] = useState(() => (esColaborador ? 'solicitudes' : 'analisis'))
   const [nueva, setNueva] = useState(false)
   const pendientes = sol.datos.filter((s) => s.estado === 'pendiente').length
   const puedePedir = puedeOperar || (esColaborador && idColaborador)
@@ -49,13 +50,16 @@ export default function Vacaciones() {
         valor={vista}
         onCambio={setVista}
         opciones={[
+          ...(esColaborador ? [] : [{ valor: 'analisis', etiqueta: 'Análisis' }]),
           { valor: 'solicitudes', etiqueta: 'Solicitudes', n: pendientes || null },
           { valor: 'calendario', etiqueta: 'Calendario' },
           { valor: 'saldos', etiqueta: esColaborador ? 'Mi saldo' : 'Saldos' },
         ]}
       />
 
-      {sol.error ? <ErrorCaja error={sol.error}>No se pudieron leer las solicitudes.</ErrorCaja> : vista === 'solicitudes' ? (
+      {sol.error ? <ErrorCaja error={sol.error}>No se pudieron leer las solicitudes.</ErrorCaja> : vista === 'analisis' && !esColaborador ? (
+        sol.cargando ? <Cargando lineas={5} /> : <AnalisisVacaciones datos={sol.datos} jornada={jornada} />
+      ) : vista === 'solicitudes' ? (
         <Solicitudes datos={sol.datos} cargando={sol.cargando} />
       ) : vista === 'calendario' ? (
         <Calendario datos={sol.datos} jornada={jornada} />

@@ -5,6 +5,12 @@ import { auth, db } from '../firebase.js'
 
 const Ctx = createContext(null)
 
+/* ── Credenciales demo pre-cargadas en el login ── */
+export const DEMO_CORREO = 'demo@otconsulting.com.mx'
+export const DEMO_CLAVE  = 'demo1234'
+const DEMO_UID = 'demo_rh_user'
+const DEMO_PERFIL = { rol: 'admin', nombre: 'Demo RH', activo: true }
+
 /**
  * estado: 'cargando' | 'fuera' | 'sin-acceso' | 'dentro'
  * perfil: documento usuarios/{uid} ({rol, nombre?})
@@ -15,6 +21,10 @@ export function SesionProvider({ children }) {
   useEffect(() =>
     onAuthStateChanged(auth, async (usuario) => {
       if (!usuario) return setSesion({ estado: 'fuera', usuario: null, perfil: null })
+      // El usuario demo no tiene doc en Firestore; su perfil es hardcoded
+      if (usuario.uid === DEMO_UID) {
+        return setSesion({ estado: 'dentro', usuario, perfil: DEMO_PERFIL })
+      }
       try {
         const snap = await getDoc(doc(db, 'usuarios', usuario.uid))
         if (!snap.exists() || !snap.data().rol || snap.data().activo === false) return setSesion({ estado: 'sin-acceso', usuario, perfil: null })
@@ -28,7 +38,6 @@ export function SesionProvider({ children }) {
     ...sesion,
     rol: sesion.perfil?.rol ?? null,
     esAdmin: sesion.perfil?.rol === 'admin',
-    // admin y rh operan (aprueban, marcan tareas, suben CVs); lector solo consulta y chatea.
     puedeOperar: ['admin', 'rh'].includes(sesion.perfil?.rol),
     esColaborador: sesion.perfil?.rol === 'colaborador',
     idColaborador: sesion.perfil?.id_colaborador ?? null,

@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { AlertTriangle, Check, Loader2, Search, X } from 'lucide-react'
 import { num } from '../lib/formato.js'
+import Monito from './Monito.jsx'
 
 // ============================================================ botones
 const VARIANTES = {
@@ -471,12 +472,16 @@ export function Isotipo({ className = 'h-10 w-10', redondeo = 'rounded-xl' }) {
   )
 }
 
-/** Avatar de un agente: su matiz degradado + ícono blanco. */
-export function AvatarAgente({ ag, tam = 'h-9 w-9', icono = 'h-4 w-4', redondeo = 'rounded-xl' }) {
-  const Icono = ag?.icono
+/**
+ * Avatar de un agente: su monito pixel art sobre un mosaico claro.
+ * `estado` (quieto|pensando|hablando|feliz) y `animado` solo donde el agente está activo;
+ * en listas y menús queda fijo para no distraer. `icono` se conserva por compatibilidad.
+ */
+// eslint-disable-next-line no-unused-vars
+export function AvatarAgente({ ag, tam = 'h-9 w-9', icono, redondeo = 'rounded-xl', estado = 'quieto', animado = false }) {
   return (
-    <span className={`grid shrink-0 place-items-center text-white ${ag?.grad || 'grad-ot'} ${tam} ${redondeo}`}>
-      {Icono && <Icono className={icono} strokeWidth={2} />}
+    <span className={`grid shrink-0 place-items-center overflow-hidden bg-[#FFF1EC] ring-1 ring-inset ring-[#FFD9CC] ${tam} ${redondeo}`}>
+      <Monito agente={ag?.id} estado={estado} tam={null} titulo={ag?.nombre} className={`h-[86%] w-[86%] ${animado ? '' : 'monito-fijo'}`} />
     </span>
   )
 }

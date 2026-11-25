@@ -9,6 +9,7 @@ import {
   Boton, CampoBusqueda, Campo, Cargando, Encabezado, ErrorCaja, Iniciales, Markdown, Panel, Pastilla, Pestanas, Resaltar,
   Vacio, claseEntrada, useAviso, useDebounce,
 } from '../components/ui.jsx'
+import { ResumenCultura } from '../components/GraficasPersonas.jsx'
 
 export default function Cultura() {
   const [pestana, setPestana] = useState('reconocimientos')
@@ -175,6 +176,8 @@ function Reconocimientos({ valores }) {
 
   return (
     <div>
+      {!cargando && !error && <ResumenCultura datos={datos} />}
+
       <div className="mb-5 flex flex-wrap items-center gap-2">
         <CampoBusqueda valor={texto} onCambio={setTexto} placeholder="Persona, valor o mensaje" className="w-full sm:w-[280px]" />
         <span className="text-[13px] text-humo">{num(datos.length)} reconocimientos · {num(mes)} este mes</span>
